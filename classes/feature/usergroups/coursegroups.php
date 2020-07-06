@@ -305,7 +305,7 @@ class coursegroups {
             $displayname = $groupprefix . ': ' . $displayname;
         }
 
-        $description = $course->summary;
+        $description = ''; // Replace $course->summary with an empty string since our course description isn't useful to Teams.
 
         $extra = null;
 
