@@ -289,12 +289,12 @@ class coursegroups {
      */
     public function create_class_team($course, $ownerids, $groupprefix = null) {
         $now = time();
-        $displayname = $course->fullname;
+        $displayname = $course->fullname; 
         if (!empty($groupprefix)) {
             $displayname = $groupprefix . ': ' . $displayname;
         }
 
-        $description = $course->summary;
+        $description = ''; // Replaced $course->summary since it contained html that wasn't used in Teams.
 
         $extra = null;
 

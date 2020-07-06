@@ -670,7 +670,16 @@ class main {
         }
 
         list($usernamesql, $usernameparams) = $DB->get_in_or_equal($usernames);
-        $sql = 'SELECT u.username,
+        // **************************************************************************************
+        // CUMOODLE -- Check against u.email (Moodle user email address) rather than the username
+        //
+        // Changed the following in the two SQL statements below:
+        //          SELECT portion: replaced u.username with u.email
+        //                          added u.username as a field that is selected
+        //          WHERE portion: u.username to u.email
+        // Modified June 23, 2020 by Trevor McCready
+        //
+        $sql = 'SELECT u.email,
                        u.id as muserid,
                        u.auth,
                        tok.id as tokid,
@@ -678,13 +687,14 @@ class main {
                        assign.assigned assigned,
                        assign.photoid photoid,
                        assign.photoupdated photoupdated,
-                       obj.id AS objrecid
+                       obj.id AS objrecid,
+                       u.username
                   FROM {user} u
              LEFT JOIN {auth_oidc_token} tok ON tok.userid = u.id
              LEFT JOIN {local_o365_connections} conn ON conn.muserid = u.id
              LEFT JOIN {local_o365_appassign} assign ON assign.muserid = u.id
              LEFT JOIN {local_o365_objects} obj ON obj.type = ? AND obj.moodleid = u.id
-                 WHERE u.username '.$usernamesql.' AND u.mnethostid = ? AND u.deleted = ?
+                 WHERE u.email '.$usernamesql.' AND u.mnethostid = ? AND u.deleted = ?
               ORDER BY CONCAT(u.username, \'~\')'; // Sort john.smith@example.org before john.smith.
         $params = array_merge(['user'], $usernameparams, [$CFG->mnet_localhost_id, '0']);
         $existingusers = $DB->get_records_sql($sql, $params);
@@ -707,7 +717,7 @@ class main {
              LEFT JOIN {local_o365_connections} conn ON conn.muserid = u.id
              LEFT JOIN {local_o365_appassign} assign ON assign.muserid = u.id
              LEFT JOIN {local_o365_objects} obj ON obj.type = ? AND obj.moodleid = u.id
-                 WHERE tok.oidcusername '.$upnsql.' AND u.username '.$usernamesql.' AND u.mnethostid = ? AND u.deleted = ? ';
+                 WHERE tok.oidcusername '.$upnsql.' AND u.email '.$usernamesql.' AND u.mnethostid = ? AND u.deleted = ? ';
         $params = array_merge(['user'], $upnparams, $usernameparams, [$CFG->mnet_localhost_id, '0']);
         $linkedexistingusers = $DB->get_records_sql($sql, $params);
 
